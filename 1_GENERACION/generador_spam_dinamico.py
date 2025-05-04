@@ -60,7 +60,7 @@ def crear_archivos_plantilla():
     guardar_lista_como_csv(["50", "70", "80", "65", "90"], 
                          "descuentos", "plantillas_descuentos_spam.csv")
     
-    guardar_lista_como_csv(["612345678", "698765432", "654321987", "623456789", "687654321"], 
+    guardar_lista_como_csv(["912 345 678", "986 421 735", " 994 880 102", "973 330 210", "901 555 444"], 
                          "telefonos", "plantillas_telefonos_spam.csv")
     
     guardar_lista_como_csv(["bit.ly/premio-ya", "promocion-exclusiva.net", "ofertas-limitadas.com", "verificar-cuenta.net", "premios-online.es"], 
@@ -72,13 +72,13 @@ def crear_archivos_plantilla():
     guardar_lista_como_csv(["bloqueada", "suspendida", "comprometida", "vencida", "en riesgo"], 
                          "problemas", "plantillas_problemas_spam.csv")
     
-    guardar_lista_como_csv(["BetCasino", "LuckyPlay", "GananciasYA", "FortunaOnline", "MegaApuestas"], 
+    guardar_lista_como_csv(["Casino Excalibur", "Casino Star", "Casino Mitos", "Palacio Royal Trujillo", "Keops"], 
                          "casinos", "plantillas_casinos_spam.csv")
     
     guardar_lista_como_csv(["100", "200", "50", "500", "1000"], 
                          "cantidades", "plantillas_cantidades_spam.csv")
     
-    guardar_lista_como_csv(["BBVA", "Santander", "CaixaBank", "Sabadell", "Bankinter"], 
+    guardar_lista_como_csv(["BBVA", "Interbank", "Scotiabank", "Banco de la Nación", "Banco Aztec"], 
                          "bancos", "plantillas_bancos_spam.csv")
     
     guardar_lista_como_csv(["WIN2024", "PREMIO50", "VIP2024", "LUCKY777", "BONO100"], 
