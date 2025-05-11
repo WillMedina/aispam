@@ -1,5 +1,5 @@
 #!pip install pandas random numpy re
-
+#codigo obsoleto
 import pandas as pd
 import random
 import numpy as np
