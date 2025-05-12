@@ -26,8 +26,8 @@ import unicodedata # Necesario para normalización y categorías Unicode
 # Buenas opciones generales (equilibrio velocidad/calidad):
 # MODEL_NAME = 'datificate/gpt2-small-spanish'
 # MODEL_NAME = 'DeepESP/gpt2-spanish'
-#MODEL_NAME = 'flax-community/gpt-2-spanish' # Tu elección actual, buena
-MODEL_NAME = 'mrm8488/spanish-gpt2'
+MODEL_NAME = 'flax-community/gpt-2-spanish' # Tu elección actual, buena
+#MODEL_NAME = 'mrm8488/spanish-gpt2'
 
 # Opciones más grandes/potentes (requieren más VRAM/tiempo):
 # MODEL_NAME = 'bigscience/bloom-560m'
