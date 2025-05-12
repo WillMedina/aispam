@@ -2,8 +2,8 @@
 Módulo para generar mensajes spam y ham usando modelos de texto en español y estructurar un dataset balanceado.
 Compatible con entornos locales y Colab; detecta GPU y usa CPU si no está disponible.
 '''
-# Instalar dependencias (ejecutar en Colab)
-#!pip install transformers torch #--quiet
+# Instalar dependencias (en Colab)
+#!pip install pandas transformers torch #--quiet
 import os
 import random
 import pandas as pd
@@ -18,7 +18,6 @@ import unicodedata # Necesario para normalización y categorías Unicode
 # ------------------------------------------------------
 # Configuración
 # ------------------------------------------------------
-# DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu' # Movido para después de la selección de modelo
 # print(f"Dispositivo detectado inicialmente: {DEVICE}")
 # if DEVICE != 'cuda':
 # print("AVISO: No se detecta GPU. Se usará CPU, lo cual será más lento.")
@@ -54,11 +53,10 @@ MODEL_NAME = 'flax-community/gpt-2-spanish' # Tu elección actual, buena
 #     USE_QUANTIZATION = False
 #     quantization_config = None
 
-
-
 # --- Carga de modelo y tokenizer ---
 # Mover la detección de dispositivo y carga aquí para que `device_map` funcione bien con cuantización
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
 # Asegurar que el pad_token es eos_token si no está definido
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
@@ -81,18 +79,23 @@ if DEVICE == 'cuda':
         # else:
         model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
         print(f"Modelo {MODEL_NAME} cargado en {DEVICE}.")
+        
         # torch.compile es más efectivo en versiones recientes de PyTorch y con GPUs compatibles
         print("Compilando modelo con torch.compile (puede tardar unos minutos la primera vez)...")
         model = torch.compile(model, mode="reduce-overhead") # mode="max-autotune" para más optimización pero más tiempo de compilación
         print("Modelo compilado.")
+        
     except Exception as e:
         print(f"Error al cargar o compilar modelo en GPU: {e}. Intentando en CPU.")
         DEVICE = 'cpu' # Forzar CPU si hay error en GPU
         model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
         print(f"Modelo {MODEL_NAME} cargado en CPU.")
+        
 else:
     print("AVISO: No se detecta GPU o se forzó CPU. Se usará CPU, lo cual será más lento.")
+    
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME).to(DEVICE)
+    
     # model_cpu_quantized = torch.quantization.quantize_dynamic( # Ejemplo cuantización CPU
     # model.to('cpu'), {torch.nn.Linear}, dtype=torch.qint8
     # )
@@ -119,7 +122,7 @@ def clean_text(text_input: str) -> str:
         return ""
 
     # 2. Eliminar Emojis y muchos otros símbolos (usando rangos Unicode)
-    # Esta es una aproximación. Para una solución más completa, considera la librería 'emoji'.
+    # Esta es una aproximación. Para una solución más completa, considerar la librería 'emoji'.
     # pip install emoji
     # import emoji
     # text = emoji.replace_emoji(text, replace=' ')
@@ -137,14 +140,13 @@ def clean_text(text_input: str) -> str:
             "\U0001FA70-\U0001FAFF"  # Symbols and Pictographs Extended-A
             "\U00002700-\U000027BF"  # Dingbats
             "\U00002B50"             # Star emoji (ejemplo individual)
-            # Puedes añadir más rangos si es necesario
             "]+", flags=re.UNICODE)
         text = emoji_pattern.sub(' ', text) # Reemplazar por espacio
+        
     except re.error: # Por si la regex es demasiado compleja en alguna plataforma de Python antigua
         print("Advertencia: No se pudo compilar la regex de emojis compleja. Usando un filtro más simple.")
         # Un filtro mucho más simple (menos efectivo para emojis, pero más seguro)
         text = ''.join(char for char in text if unicodedata.category(char)[0] not in ['So']) # So = Symbol, other
-
 
     # 3. Reemplazar saltos de línea
     text = text.replace('\n', ' ').replace('\r', ' ')
@@ -158,7 +160,7 @@ def clean_text(text_input: str) -> str:
     # Permitiremos letras, números, espacios y un conjunto de puntuación común.
     # Todo lo demás se filtrará (o se reemplazará por un espacio para evitar unir palabras).
     cleaned_chars = []
-    allowed_punctuation = ".,;:!?¡¿-'()[]{}<>/@#%&=+*_~\\$" # Ajusta según necesites
+    allowed_punctuation = ".,;:!?¡¿-'()[]{}<>/@#%&=+*_~\\$" # Ajustar según se necesite
     
     for char in text:
         category = unicodedata.category(char)[0] # Obtiene la categoría principal (L, N, P, Z, S, C)
@@ -170,6 +172,7 @@ def clean_text(text_input: str) -> str:
             cleaned_chars.append(char)
         elif category == 'P': # Otra puntuación no en la lista blanca
             cleaned_chars.append(' ') # Reemplazar por espacio
+            
         # Los caracteres de otras categorías (S: Símbolos no emojis, C: Control, M: Marcas)
         # se omiten o se reemplazan por espacio si se quiere ser más cauto.
         # else:
@@ -201,7 +204,7 @@ def clear_gpu_memory():
     
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
-        # Adicionalmente, podrías forzar la recolección de basura de Python
+        #garbage collector:
         import gc
         gc.collect()
         print("Memoria GPU y caché liberadas.")
@@ -357,6 +360,7 @@ def create_dataset(total: int,
     random.shuffle(tasks)
 
     results = []
+    
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(func) for func in tasks]
         for i, fut in enumerate(as_completed(futures)):
