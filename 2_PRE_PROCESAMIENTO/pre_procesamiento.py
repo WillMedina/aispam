@@ -15,6 +15,7 @@ from nltk.stem import SnowballStemmer
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import classification_report, confusion_matrix
+import joblib
 '''
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
@@ -113,7 +114,7 @@ def print_memory_usage():
 #csv_path = "COLAB_GPU_dataset_spam_ham_flax-community_gpt-2-spanish_10000_48_augmented_markov2.csv"
 
 #ruta del dataset original a pre-procesar
-csv_path = '';
+csv_path = 'datasets/COLAB_GPU_dataset_spam_ham_flax-community_gpt-2-spanish_10000_48_augmented_markov2.csv';
 df = pd.read_csv(csv_path, dtype={'Mensaje': str})
 
 print("====== CARGA CON EXITO DE DATOS ==================")
@@ -137,7 +138,7 @@ def clean_text(text):
         
         # Limpieza básica del texto
         text = text.lower()
-        text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)
+        #text = re.sub(r'http\S+|www\S+|https\S+', '', text, flags=re.MULTILINE)  #los links se filtran aca
         text = re.sub(r'@\w+|\#', '', text)
         text = re.sub(r'[^\w\s]', '', text)
         text = re.sub(r'\d+', '', text)
@@ -177,6 +178,13 @@ clean_memory(True)
 tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1,2))
 X = tfidf.fit_transform(df['processed_Text']).toarray()
 y = df['tipo_n'].values
+
+# AÑADE ESTO PARA GUARDAR EL TFIDF FITTED:
+output_dir = 'preprocessing_assets' # Crea este directorio si no existe
+os.makedirs(output_dir, exist_ok=True) # Asegura que el directorio exista
+tfidf_filename = os.path.join(output_dir, 'tfidf_vectorizer.pkl')
+joblib.dump(tfidf, tfidf_filename)
+print(f"TfidfVectorizer guardado en: {tfidf_filename}")
 
 # 5. Dividir dataset --- ESTO ES PARA EL ENTRENAMIENTO
 #X_train, X_test, y_train, y_test = train_test_split(
