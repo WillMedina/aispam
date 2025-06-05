@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+}
+
+.card {
+    transition: transform 0.3s ease-in-out;
+    min-height: 280px !important;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+}
+
+.btn {
+    font-weight: bold;
+}
+
+@media (max-width: 767px) {
+    .row > .col-md-4 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

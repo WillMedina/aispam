@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>G30 - TALLER INTEGRADOR I</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+        <link rel="stylesheet" href="estilo.css?v1">
+        <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    </head>
+    <body>
+        <header>
+            <h1 class="text-center my-5" style="color: #0056A3;">Spam Detector "G30"</h1>
+        </header>
+
+        <main>
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <!-- Card 1 -->
+                    <div class="col-12 col-sm-6 col-md-3 mb-4">
+                        <div class="card shadow" style="border: none; background-color: #6CC1EB;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-align-justify fa-4x mb-3" style="color: #0056A3;"></i>
+                                <p class="card-text" style="color: black;">Detección a través de texto. Copia el contenido del correo electrónico y pégalo en este apartado para su análisis.</p>
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#frmTexto" class="btn btn-primary" style="background-color: #0056A3; border-color: #0056A3;">Texto</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 2 -->
+                    <div class="col-12 col-sm-6 col-md-3 mb-4">
+                        <div class="card shadow" style="border: none; background-color: #FDD839;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope fa-4x mb-3" style="color: #EE8600;"></i>
+                                <p class="card-text" style="color: black;">Detección a través de archivo .EML. Sube el archivo con formato .EML para su análisis.</p>
+                                <a href="javascript:void(0)" data-toggle="modal" data-target="#frmEML" class="btn btn-primary" style="background-color: #EE8600; border-color: #EE8600;">Archivo .EML</a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 3 -->
+                    <div class="col-12 col-sm-6 col-md-3 mb-4">
+                        <div class="card shadow" style="border: none; background-color: #6CC1EB;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-inbox fa-4x mb-3" style="color: #0056A3;"></i>
+                                <p class="card-text" style="color: black;">Respuesta automática. Envía un correo electrónico a <b>aispam@willmedina.me</b> y recibirás un mensaje automatizado con el análisis.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Card 4 -->
+                    <div class="col-12 col-sm-6 col-md-3 mb-4">
+                        <div class="card shadow" style="border: none; background-color: #FDD839;">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-bar fa-4x mb-3" style="color: #EE8600;"></i>
+                                <p class="card-text" style="color: black;">Subida masiva mediante archivo .CSV.</p>
+                                <a href="apiCSV.php" target="_blank" class="btn btn-primary" style="background-color: #EE8600; border-color: #EE8600;">Subida de CSV</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modals (frmTexto, frmEML, frmMensaje) -->
+        <!-- ... (mantener los mismos) ... -->
+
+        <footer class="text-center py-3">
+            <small><b>&copy; 2025-10 G30 - TALLER INTEGRADOR I</b></small>
+        </footer>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="func.js?v202505281346"></script>
+    </body>
+</html>

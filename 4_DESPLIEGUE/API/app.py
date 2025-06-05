@@ -9,6 +9,7 @@ import tensorflow as tf
 import numpy as np
 import joblib # Para cargar el TfidfVectorizer
 import pandas as pd # Para el pd.isna si decides usarlo
+from datetime import datetime # Para la fecha de revisión
 
 # --- Configuración ---
 app = Flask(__name__)
@@ -58,12 +59,24 @@ def clean_text(text):
         return ""
 
 def tokenize_and_stem(text):
+    '''
     if not text: # Si clean_text devolvió ""
         return ""
     tokens = nltk.word_tokenize(text)
     filtered_tokens = [token for token in tokens if token not in stop_words_spanish]
     stems = [stemmer_spanish.stem(token) for token in filtered_tokens]
     return ' '.join(stems)
+    '''
+    if not text:
+        return ""
+    try:
+        tokens = nltk.word_tokenize(text)
+        filtered_tokens = [token for token in tokens if token not in stop_words_spanish]
+        stems = [stemmer_spanish.stem(token) for token in filtered_tokens]
+        return ' '.join(stems)
+    except Exception as e:
+        print(f"Error tokenize_and_stem: {str(e)} | Valor original: {text}")
+        return ""
 
 def preprocess_input_text(text_message):
     """
@@ -124,6 +137,88 @@ def predict():
         # print(f"Error en /predict: {e}\n{traceback.format_exc()}")
         print(f"Error inesperado en /predict: {e}")
         return jsonify({'error': f'Error procesando la solicitud: {str(e)}'}), 500
+
+# --- NUEVO ENDPOINT: /importcsv ---
+@app.route('/importcsv', methods=['POST'])
+def import_csv():
+    if model is None or tfidf_vectorizer is None:
+        return jsonify({'error': 'Servicio no disponible: Modelo o Vectorizador no cargado'}), 503
+
+    try:
+        json_data = request.get_json()
+        
+        # Validación básica de la estructura esperada (lista con un elemento)
+        if not isinstance(json_data, list) or len(json_data) == 0:
+            return jsonify({'error': 'JSON de entrada debe ser una lista con al menos un objeto CSV'}), 400
+        
+        csv_object = json_data[0] # Asumimos que siempre viene un solo "CSV" en la lista
+
+        if 'metadata' not in csv_object or 'registros' not in csv_object:
+            return jsonify({'error': 'Objeto CSV debe contener "metadata" y "registros"'}), 400
+
+        metadata = csv_object['metadata']
+        registros = csv_object['registros']
+
+        if not isinstance(registros, list):
+            return jsonify({'error': '"registros" debe ser una lista'}), 400
+
+        # Para procesamiento por lotes más eficiente:
+        # 1. Recolectar todos los mensajes
+        # 2. Preprocesarlos todos
+        # 3. Vectorizarlos todos
+        # 4. Predecir todos
+        
+        mensajes_originales = [reg.get('mensaje', '') for reg in registros]
+        
+        # Preprocesamiento en lote
+        processed_texts_for_tfidf = []
+        for msg in mensajes_originales:
+            cleaned = clean_text(msg)
+            processed_texts_for_tfidf.append(tokenize_and_stem(cleaned))
+
+        # Vectorización en lote
+        # Manejar el caso de que todos los mensajes procesados resulten vacíos
+        if not any(processed_texts_for_tfidf): # Si todos son strings vacíos
+            # Crear vectores de ceros o la representación que tu modelo espera para "nada"
+            # El transform de TFIDF con "" da un vector de ceros si el vocabulario está vacío o no hay matches
+            # Si el vectorizador está fitteado, dará la representación de un string vacío.
+            # Esto debería ser manejado correctamente por el transform si se le da una lista de strings vacíos.
+            if not processed_texts_for_tfidf: # lista de strings vacíos si todos los mensajes eran vacíos.
+                vectorized_batch = tfidf_vectorizer.transform(["" for _ in range(len(registros))]).toarray()
+            else: # Si algunos son vacíos y otros no.
+                 vectorized_batch = tfidf_vectorizer.transform(processed_texts_for_tfidf).toarray()
+
+        else:
+            vectorized_batch = tfidf_vectorizer.transform(processed_texts_for_tfidf).toarray()
+        
+        # Predicción en lote
+        predictions_probas_batch = model.predict(vectorized_batch)
+
+        # Actualizar cada registro
+        current_timestamp = datetime.now().isoformat()
+        model_name_used = os.path.basename(MODEL_PATH) # Obtiene solo el nombre del archivo
+
+        for i, reg in enumerate(registros):
+            reg['fecha_revision'] = current_timestamp
+            reg['probabilidad_spam'] = float(predictions_probas_batch[i][0])
+            # Para 'tfidf_generado', guardaremos el texto que entró al vectorizador TF-IDF.
+            # Guardar el vector numérico completo en JSON es poco práctico y muy verboso.
+            reg['tfidf_generado'] = processed_texts_for_tfidf[i]
+            reg['modelo_usado'] = model_name_used
+            # La variable 'tipo_recibido' se mantiene tal como llegó.
+
+        # Actualizar metadata
+        metadata['procesado'] = True
+        metadata['fecha_procesamiento_api'] = current_timestamp # Añadir fecha de procesamiento
+
+        # Devolver la estructura JSON modificada
+        return jsonify(json_data) # json_data ya está modificado y es una lista
+
+    except Exception as e:
+        print(f"Error en /importcsv: {e}") # Loggear el error
+        # import traceback
+        # print(traceback.format_exc()) # Para debug más detallado
+        return jsonify({'error': f'Error procesando la solicitud CSV: {str(e)}'}), 500
 
 if __name__ == '__main__':
     # app.run(host='0.0.0.0', port=5000, debug=True) # Para desarrollo local
