@@ -114,7 +114,7 @@ def print_memory_usage():
 #csv_path = "COLAB_GPU_dataset_spam_ham_flax-community_gpt-2-spanish_10000_48_augmented_markov2.csv"
 
 #ruta del dataset original a pre-procesar
-csv_path = 'datasets/COLAB_GPU_dataset_spam_ham_flax-community_gpt-2-spanish_10000_48_augmented_markov2.csv';
+csv_path = 'datasets/DATASETS_GENERADOS/COLAB_GPU_dataset_spam_ham_flax-community_gpt-2-spanish_10000_48_augmented_markov2.csv';
 df = pd.read_csv(csv_path, dtype={'Mensaje': str})
 
 print("====== CARGA CON EXITO DE DATOS ==================")
